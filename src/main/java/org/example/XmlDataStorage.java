@@ -4,11 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import javax.swing.table.DefaultTableModel;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.io.*;
 import java.util.*;
 
 public class XmlDataStorage implements DataStorage {
@@ -18,7 +14,17 @@ public class XmlDataStorage implements DataStorage {
     public void save(DefaultTableModel model, String tableName) throws IOException {
         XmlMapper mapper = new XmlMapper();
         File file = new File(DIRECTORY_PATH + tableName + ".xml");
-        mapper.writeValue(file, model.getDataVector());
+        Vector<Vector> vectorRow = model.getDataVector();
+        for (Vector<String> vector : vectorRow) {
+            boolean isEmpty = true;
+            for (String string : vector) {
+                if(string == null || string.isEmpty()) continue;
+                isEmpty = false;
+                break;
+            }
+            if(isEmpty) vectorRow.remove(vector);
+        }
+        mapper.writeValue(file, vectorRow);
     }
 
     @Override
@@ -27,14 +33,15 @@ public class XmlDataStorage implements DataStorage {
         File file = new File(DIRECTORY_PATH + tableName + ".xml");
         if (file.exists()) {
             StringBuilder xmlContent = new StringBuilder();
-            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    xmlContent.append(line);
-                }
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                xmlContent.append(line);
             }
             String xmlString = xmlContent.toString().replaceAll(">\\s*<", "><"); // Entfernen von Leerzeichen zwischen Tags
-            Vector<String> data = mapper.readValue(xmlString, new TypeReference<Vector<String>>() {});
+            Vector<String> data;
+            data = mapper.readValue(xmlString, new TypeReference<>() {
+            });
 
             // Überprüfen, ob die Anzahl der Daten korrekt ist (muss durch 4 teilbar sein)
             if (data.size() % 4 == 0) {
@@ -47,8 +54,6 @@ public class XmlDataStorage implements DataStorage {
                     rowData[3] = data.get(i * 4 + 3); // Viertes Element in die vierte Spalte einfügen
                     model.addRow(rowData);
                 }
-            } else {
-                System.err.println("Ungültige Anzahl von Daten in der XML-Datei.");
             }
         }
     }

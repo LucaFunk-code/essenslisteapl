@@ -3,8 +3,6 @@ package org.example;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,11 +10,11 @@ import java.util.Collections;
 
 
 public class TablePanel extends JPanel {
-    private DefaultListModel<String> tableListModel;
-    private JList<String> tableList;
-    private JPanel tableDetailPanel;
+    private final DefaultListModel<String> tableListModel;
+    private final JList<String> tableList;
+    private final JPanel tableDetailPanel;
     private int tableCount = 0;
-    private DataStorage dataStorage;
+    private final DataStorage dataStorage;
 
     public TablePanel() {
         this.dataStorage = new XmlDataStorage();
@@ -26,7 +24,7 @@ public class TablePanel extends JPanel {
         tableListModel = new DefaultListModel<>();
         tableList = new JList<>(tableListModel);
         tableList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tableList.addListSelectionListener(e -> showTableDetail(tableList.getSelectedIndex()));
+        tableList.addListSelectionListener(_ -> showTableDetail(tableList.getSelectedIndex()));
         JScrollPane listScrollPane = new JScrollPane(tableList);
         listScrollPane.setPreferredSize(new Dimension(200, 0));
         add(listScrollPane, BorderLayout.WEST);
@@ -37,25 +35,25 @@ public class TablePanel extends JPanel {
 
         // Button to add new table
         JButton addButton = new JButton("Neue Tabelle hinzufügen");
-        addButton.addActionListener(e -> addNewTable());
+        addButton.addActionListener(_ -> addNewTable());
 
         // Button to add new row to selected table
         JButton addRowButton = new JButton("Neue Zeile hinzufügen");
-        addRowButton.addActionListener(e -> addNewRowToSelectedTable());
+        addRowButton.addActionListener(_ -> addNewRowToSelectedTable());
 
         // Button to rename table
         JButton renameButton = new JButton("Tabellennamen ändern");
-        renameButton.addActionListener(e -> changeTableName());
+        renameButton.addActionListener(_ -> changeTableName());
 
         JButton sortButton = new JButton("Tabellen nach Namen sortieren");
-        sortButton.addActionListener(e -> {
+        sortButton.addActionListener(_ -> {
             String name = JOptionPane.showInputDialog("Geben Sie einen Namen ein:");
             sortTableListByName(name);
         });
 
         // Button to save table data
         JButton saveButton = new JButton("Tabellen speichern");
-        saveButton.addActionListener(e -> saveAllTables());
+        saveButton.addActionListener(_ -> saveAllTables());
 
         // Panel for bottom buttons
         JPanel bottomButtonPanel = new JPanel();
@@ -71,7 +69,7 @@ public class TablePanel extends JPanel {
 
     private void sortTableListByName(String name) {
         ArrayList<String> tableNames = Collections.list(tableListModel.elements());
-        ArrayList matchingNames = new ArrayList();
+        ArrayList<String> matchingNames = new ArrayList<>();
 
 
         for (String tableName : tableNames) {
@@ -91,8 +89,8 @@ public class TablePanel extends JPanel {
 
 
         tableListModel.clear();
-        for (Object tableName : matchingNames) {
-            tableListModel.addElement((String) tableName);
+        for (String tableName : matchingNames) {
+            tableListModel.addElement(tableName);
         }
     }
 
@@ -112,9 +110,8 @@ public class TablePanel extends JPanel {
                 String newFileName = newTableName + ".xml";
                 File oldFile = new File(DIRECTORY_PATH + oldFileName);
                 File newFile = new File(DIRECTORY_PATH + newFileName);
-                if (oldFile.exists() && oldFile.isFile()) {
-                    oldFile.renameTo(newFile);
-                }
+                if (oldFile.exists() && oldFile.isFile() && !oldFile.renameTo(newFile))
+                    JOptionPane.showMessageDialog(this, "Fehler beim Umbenennen!");
             }
         } else {
             JOptionPane.showMessageDialog(this, "Bitte wählen Sie eine Tabelle aus, um den Namen zu ändern.", "Warnung", JOptionPane.WARNING_MESSAGE);
@@ -158,7 +155,7 @@ public class TablePanel extends JPanel {
             try {
                 dataStorage.save(model, tableName);
             } catch (IOException e) {
-                e.printStackTrace();
+                System.err.println(e.getMessage());
             }
         }
     }
@@ -184,7 +181,7 @@ public class TablePanel extends JPanel {
                             tableDetailPanel.add(tableScrollPane, tableName);
                             tableListModel.addElement(tableName);
                         } catch (IOException e) {
-                            e.printStackTrace();
+                            System.err.println(e.getMessage());
                         }
                     }
                 }
@@ -195,7 +192,6 @@ public class TablePanel extends JPanel {
     private void addNewRowToSelectedTable() {
         int selectedIndex = tableList.getSelectedIndex();
         if (selectedIndex != -1) {
-            String tableName = tableListModel.getElementAt(selectedIndex);
             JScrollPane scrollPane = (JScrollPane) tableDetailPanel.getComponent(selectedIndex);
             JTable table = (JTable) scrollPane.getViewport().getView();
             DefaultTableModel model = (DefaultTableModel) table.getModel();
