@@ -110,7 +110,7 @@ public class TablePanel extends JPanel {
                 String newFileName = newTableName + ".xml";
                 File oldFile = new File(DIRECTORY_PATH + oldFileName);
                 File newFile = new File(DIRECTORY_PATH + newFileName);
-                if (oldFile.exists() && oldFile.isFile() && !oldFile.renameTo(newFile))
+                if (!oldFile.exists() && !oldFile.isFile() && !oldFile.renameTo(newFile))
                     JOptionPane.showMessageDialog(this, "Fehler beim Umbenennen!");
             }
         } else {
