@@ -55,6 +55,7 @@ public class XmlDataStorage implements DataStorage {
                     model.addRow(rowData);
                 }
             }
+            reader.close();
         }
     }
 }

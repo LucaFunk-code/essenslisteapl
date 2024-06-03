@@ -5,6 +5,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -43,7 +44,9 @@ public class TablePanel extends JPanel {
 
         // Button to rename table
         JButton renameButton = new JButton("Tabellennamen ändern");
-        renameButton.addActionListener(_ -> changeTableName());
+        renameButton.addActionListener(_ -> {
+            changeTableName();
+        });
 
         JButton sortButton = new JButton("Tabellen nach Namen sortieren");
         sortButton.addActionListener(_ -> {
@@ -110,8 +113,14 @@ public class TablePanel extends JPanel {
                 String newFileName = newTableName + ".xml";
                 File oldFile = new File(DIRECTORY_PATH + oldFileName);
                 File newFile = new File(DIRECTORY_PATH + newFileName);
-                if (!oldFile.exists() && !oldFile.isFile() && !oldFile.renameTo(newFile))
-                    JOptionPane.showMessageDialog(this, "Fehler beim Umbenennen!");
+                if (oldFile.exists() && oldFile.isFile()) {
+                    try {
+                        Files.move(oldFile.toPath(), newFile.toPath());
+                    } catch (IOException e) {
+                        System.out.println(e.getMessage());
+                        JOptionPane.showMessageDialog(this, "Fehler beim Umbenennen der Datei!");
+                    }
+                }
             }
         } else {
             JOptionPane.showMessageDialog(this, "Bitte wählen Sie eine Tabelle aus, um den Namen zu ändern.", "Warnung", JOptionPane.WARNING_MESSAGE);
