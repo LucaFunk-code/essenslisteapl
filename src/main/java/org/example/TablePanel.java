@@ -106,8 +106,10 @@ public class TablePanel extends JPanel {
 
         if (choice == 0) {
             bundle = ResourceBundle.getBundle("messages", new Locale("en"));
+
         } else if (choice == 1) {
             bundle = ResourceBundle.getBundle("messages", new Locale("de"));
+
         }
 
         updateButtonLabels();
@@ -178,9 +180,14 @@ public class TablePanel extends JPanel {
         };
 
         // Add an empty row
+
         model.addRow(new Object[]{"", "", "", ""});
 
         JTable table = new JTable(model);
+
+        // Set custom cell editor for "price" column
+        table.getColumnModel().getColumn(3).setCellEditor(new NumericCellEditor());
+
         JScrollPane tableScrollPane = new JScrollPane(table);
         tableDetailPanel.add(tableScrollPane, tableName);
     }
