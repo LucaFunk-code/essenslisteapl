@@ -2,6 +2,7 @@ package org.example;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -172,7 +173,8 @@ public class TablePanel extends JPanel {
         String tableName = bundle.getString("table") + " " + tableCount;
         tableListModel.addElement(tableName);
 
-        DefaultTableModel model = new DefaultTableModel(new Object[]{bundle.getString("name"), bundle.getString("calories"), bundle.getString("amount"), bundle.getString("price")}, 0) {
+        // Modify the column names to include the "tags" column
+        DefaultTableModel model = new DefaultTableModel(new Object[]{bundle.getString("name"), bundle.getString("calories"), bundle.getString("amount"), bundle.getString("price"), bundle.getString("tags")}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return true; // All cells are editable
@@ -186,15 +188,22 @@ public class TablePanel extends JPanel {
                     case 1: return Integer.class; // Calories column accepts integers
                     case 2: return Integer.class; // Amount column accepts integers
                     case 3: return Double.class;  // Price column accepts doubles
+                    case 4: return String.class;  // Tags column accepts strings
                     default: return Object.class;
                 }
             }
         };
 
         // Add an empty row with initial values
-        model.addRow(new Object[]{"", 0, 0, 0.0});
+        model.addRow(new Object[]{"", 0, 0, 0.0, ""});
 
         JTable table = new JTable(model);
+
+        // Add JComboBox as editor for tags column
+        JComboBox<String> tagsComboBox = new JComboBox<>(new String[]{"Vegetable", "Fruit"}); // Predefined tags
+        TableColumn tagsColumn = table.getColumnModel().getColumn(4); // Assuming the tags column is the 5th column
+        tagsColumn.setCellEditor(new DefaultCellEditor(tagsComboBox));
+
         JScrollPane tableScrollPane = new JScrollPane(table);
         tableDetailPanel.add(tableScrollPane, tableName);
 
@@ -202,6 +211,7 @@ public class TablePanel extends JPanel {
         table.revalidate();
         table.repaint();
     }
+
 
     private void showTableDetail(int index) {
         if (index != -1) {
@@ -212,7 +222,15 @@ public class TablePanel extends JPanel {
     }
 
     private void saveAllTables() {
-        for (int i = 0; i < tableListModel.getSize(); i++) {
+        int tableCount = tableListModel.getSize();
+        int componentCount = tableDetailPanel.getComponentCount();
+
+        if (tableCount != componentCount) {
+            System.err.println("Mismatch in table count and component count. Unable to save tables.");
+            return;
+        }
+
+        for (int i = 0; i < tableCount; i++) {
             String tableName = tableListModel.getElementAt(i);
             JScrollPane scrollPane = (JScrollPane) tableDetailPanel.getComponent(i);
             JTable table = (JTable) scrollPane.getViewport().getView();
@@ -234,7 +252,7 @@ public class TablePanel extends JPanel {
                     if (file.isFile() && file.getName().endsWith(".xml")) {
                         String tableName = file.getName().replace(".xml", "");
                         try {
-                            DefaultTableModel model = new DefaultTableModel(new Object[]{bundle.getString("name"), bundle.getString("calories"), bundle.getString("amount"), bundle.getString("price")}, 0) {
+                            DefaultTableModel model = new DefaultTableModel(new Object[]{bundle.getString("name"), bundle.getString("calories"), bundle.getString("amount"), bundle.getString("price"),bundle.getString("tags")}, 0) {
                                 @Override
                                 public boolean isCellEditable(int row, int column) {
                                     return true; // All cells are editable
@@ -261,8 +279,19 @@ public class TablePanel extends JPanel {
             JTable table = (JTable) scrollPane.getViewport().getView();
             DefaultTableModel model = (DefaultTableModel) table.getModel();
 
-            // Add an empty row with initial values of appropriate data types
-            model.addRow(new Object[]{"", 0, 0, 0.0});
+            // Create a JComboBox as editor for tags column
+            String[] tags = {"Vegetable", "Fruit"};
+            JComboBox<String> tagsComboBox = new JComboBox<>(tags);
+            TableColumn tagsColumn = table.getColumnModel().getColumn(4); // Assuming the tags column is the 5th column
+            tagsColumn.setCellEditor(new DefaultCellEditor(tagsComboBox));
+
+            // Add an empty row with initial values
+            model.addRow(new Object[]{"", 0, 0, 0.0, ""});
+
+            // Set the value of the tags column to an empty string
+            // (since the JComboBox is the editor, the actual value will be set when the user selects an option)
+            int lastRowIndex = model.getRowCount() - 1;
+            model.setValueAt("", lastRowIndex, 4);
 
             // Refresh the table view
             table.revalidate();
@@ -271,6 +300,7 @@ public class TablePanel extends JPanel {
             JOptionPane.showMessageDialog(this, bundle.getString("select_table_to_add_row"), bundle.getString("warning"), JOptionPane.WARNING_MESSAGE);
         }
     }
+
 
     private void deleteTable() {
         int selectedIndex = tableList.getSelectedIndex();
