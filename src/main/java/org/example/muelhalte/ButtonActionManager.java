@@ -1,7 +1,4 @@
-package org.example;
-
-import javax.swing.*;
-import java.awt.event.ActionListener;
+package org.example.muelhalte;
 
 /*public class ButtonActionManager {
     private final LanguageManager languageManager;
