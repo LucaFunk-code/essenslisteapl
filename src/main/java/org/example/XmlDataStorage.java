@@ -15,14 +15,19 @@ public class XmlDataStorage implements DataStorage {
         XmlMapper mapper = new XmlMapper();
         File file = new File(DIRECTORY_PATH + tableName + ".xml");
         Vector<Vector> vectorRow = model.getDataVector();
-        for (Vector<String> vector : vectorRow) {
+        Iterator<Vector> iterator = vectorRow.iterator();
+        while (iterator.hasNext()) {
+            Vector<?> vector = iterator.next();
             boolean isEmpty = true;
-            for (String string : vector) {
-                if(string == null || string.isEmpty()) continue;
-                isEmpty = false;
-                break;
+            for (Object obj : vector) {
+                if (obj != null && !obj.toString().isEmpty()) {
+                    isEmpty = false;
+                    break;
+                }
             }
-            if(isEmpty) vectorRow.remove(vector);
+            if (isEmpty) {
+                iterator.remove();
+            }
         }
         mapper.writeValue(file, vectorRow);
     }

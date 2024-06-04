@@ -177,19 +177,30 @@ public class TablePanel extends JPanel {
             public boolean isCellEditable(int row, int column) {
                 return true; // All cells are editable
             }
+
+            @Override
+            public Class<?> getColumnClass(int columnIndex) {
+                // Specify the data type for each column
+                switch (columnIndex) {
+                    case 0: return String.class;  // Name column accepts text
+                    case 1: return Integer.class; // Calories column accepts integers
+                    case 2: return Integer.class; // Amount column accepts integers
+                    case 3: return Double.class;  // Price column accepts doubles
+                    default: return Object.class;
+                }
+            }
         };
 
-        // Add an empty row
-
-        model.addRow(new Object[]{"", "", "", ""});
+        // Add an empty row with initial values
+        model.addRow(new Object[]{"", 0, 0, 0.0});
 
         JTable table = new JTable(model);
-
-        // Set custom cell editor for "price" column
-        table.getColumnModel().getColumn(3).setCellEditor(new NumericCellEditor());
-
         JScrollPane tableScrollPane = new JScrollPane(table);
         tableDetailPanel.add(tableScrollPane, tableName);
+
+        // Refresh the table view
+        table.revalidate();
+        table.repaint();
     }
 
     private void showTableDetail(int index) {
@@ -249,7 +260,13 @@ public class TablePanel extends JPanel {
             JScrollPane scrollPane = (JScrollPane) tableDetailPanel.getComponent(selectedIndex);
             JTable table = (JTable) scrollPane.getViewport().getView();
             DefaultTableModel model = (DefaultTableModel) table.getModel();
-            model.addRow(new Object[]{"", "", "", ""}); // Add an empty row
+
+            // Add an empty row with initial values of appropriate data types
+            model.addRow(new Object[]{"", 0, 0, 0.0});
+
+            // Refresh the table view
+            table.revalidate();
+            table.repaint();
         } else {
             JOptionPane.showMessageDialog(this, bundle.getString("select_table_to_add_row"), bundle.getString("warning"), JOptionPane.WARNING_MESSAGE);
         }
