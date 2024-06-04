@@ -3,7 +3,7 @@ package org.example;
 import javax.swing.*;
 import java.awt.event.ActionListener;
 
-public class ButtonActionManager {
+/*public class ButtonActionManager {
     private final LanguageManager languageManager;
     private final TablePanel tablePanel;
 
@@ -25,3 +25,4 @@ public class ButtonActionManager {
         languageButton.addActionListener(e -> tablePanel.changeLanguage());
     }
 }
+*/

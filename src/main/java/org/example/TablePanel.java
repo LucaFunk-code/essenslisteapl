@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 public class TablePanel extends JPanel {
     private static final String DIRECTORY_PATH = "src/main/resources/data/";
@@ -16,9 +18,20 @@ public class TablePanel extends JPanel {
     private final JPanel tableDetailPanel;
     private int tableCount = 0;
     private final DataStorage dataStorage;
+    private ResourceBundle bundle;
+
+    // Buttons to be updated when language changes
+    private JButton addButton;
+    private JButton addRowButton;
+    private JButton renameButton;
+    private JButton sortButton;
+    private JButton deleteButton;
+    private JButton saveButton;
+    private JButton languageButton;
 
     public TablePanel() {
         this.dataStorage = new XmlDataStorage();
+        this.bundle = ResourceBundle.getBundle("messages", Locale.getDefault());
 
         setLayout(new BorderLayout());
         // List Panel
@@ -34,31 +47,26 @@ public class TablePanel extends JPanel {
         tableDetailPanel = new JPanel(new CardLayout());
         add(tableDetailPanel, BorderLayout.CENTER);
 
-        // Button to add new table
-        JButton addButton = new JButton("Neue Tabelle hinzufügen");
+        // Buttons
+        addButton = new JButton();
         addButton.addActionListener(_ -> addNewTable());
 
-        // Button to add new row to selected table
-        JButton addRowButton = new JButton("Neue Zeile hinzufügen");
+        addRowButton = new JButton();
         addRowButton.addActionListener(_ -> addNewRowToSelectedTable());
 
-        // Button to rename table
-        JButton renameButton = new JButton("Tabellennamen ändern");
+        renameButton = new JButton();
         renameButton.addActionListener(_ -> changeTableName());
 
-        // Button to sort tables by name
-        JButton sortButton = new JButton("Tabellen nach Namen sortieren");
+        sortButton = new JButton();
         sortButton.addActionListener(_ -> {
-            String name = JOptionPane.showInputDialog("Geben Sie einen Namen ein:");
+            String name = JOptionPane.showInputDialog(bundle.getString("sort_table_prompt"));
             sortTableListByName(name);
         });
 
-        // Button to delete selected table
-        JButton deleteButton = new JButton("Tabelle löschen");
+        deleteButton = new JButton();
         deleteButton.addActionListener(_ -> deleteTable());
 
-        // Button to save table data
-        JButton saveButton = new JButton("Tabellen speichern");
+        saveButton = new JButton();
         saveButton.addActionListener(_ -> saveAllTables());
 
         // Panel for bottom buttons
@@ -68,35 +76,72 @@ public class TablePanel extends JPanel {
         bottomButtonPanel.add(addRowButton);
         bottomButtonPanel.add(renameButton);
         bottomButtonPanel.add(sortButton);
-        bottomButtonPanel.add(deleteButton); // Add delete button to panel
+        bottomButtonPanel.add(deleteButton);
         bottomButtonPanel.add(saveButton);
+
         add(bottomButtonPanel, BorderLayout.SOUTH);
+
+        // Language switch button
+        languageButton = new JButton("\uD83C\uDDE9\uD83C\uDDEA \uD83C\uDDEC\uD83C\uDDE7");
+        languageButton.addActionListener(_ -> changeLanguage());
+        bottomButtonPanel.add(languageButton);
+
+        updateButtonLabels();
+    }
+
+    private void updateButtonLabels() {
+        addButton.setText(bundle.getString("add_table"));
+        addRowButton.setText(bundle.getString("add_row"));
+        renameButton.setText(bundle.getString("rename_table"));
+        sortButton.setText(bundle.getString("sort_table"));
+        deleteButton.setText(bundle.getString("delete_table"));
+        saveButton.setText(bundle.getString("save_tables"));
+
+    }
+
+    private void changeLanguage() {
+        String[] options = {"English", "Deutsch"};
+        int choice = JOptionPane.showOptionDialog(this, bundle.getString("choose_language"), bundle.getString("language"), JOptionPane.DEFAULT_OPTION,
+                JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
+
+        if (choice == 0) {
+            bundle = ResourceBundle.getBundle("messages", new Locale("en"));
+        } else if (choice == 1) {
+            bundle = ResourceBundle.getBundle("messages", new Locale("de"));
+        }
+
+        updateButtonLabels();
     }
 
     private void sortTableListByName(String name) {
-        ArrayList<String> tableNames = Collections.list(tableListModel.elements());
-        ArrayList<String> matchingNames = new ArrayList<>();
-        for (String tableName : tableNames) {
-            if (tableName.toLowerCase().contains(name.toLowerCase())) {
-                matchingNames.add(tableName);
+        if (name != null && !name.isEmpty()) {
+            ArrayList<String> tableNames = Collections.list(tableListModel.elements());
+            ArrayList<String> matchingNames = new ArrayList<>();
+            for (String tableName : tableNames) {
+                if (tableName.toLowerCase().contains(name.toLowerCase())) {
+                    matchingNames.add(tableName);
+                }
             }
-        }
-        if (matchingNames.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Keine passende Tabelle gefunden.", "Hinweis", JOptionPane.INFORMATION_MESSAGE);
-            return;
-        }
-        Collections.sort(matchingNames);
-        tableListModel.clear();
-        for (String tableName : matchingNames) {
-            tableListModel.addElement(tableName);
+            if (matchingNames.isEmpty()) {
+                JOptionPane.showMessageDialog(this, bundle.getString("no_table_found"), bundle.getString("hint"), JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+            Collections.sort(matchingNames);
+            tableListModel.clear();
+            for (String tableName : matchingNames) {
+                tableListModel.addElement(tableName);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, bundle.getString("sort_table_prompt"), bundle.getString("warning"), JOptionPane.WARNING_MESSAGE);
         }
     }
+
 
     private void changeTableName() {
         int selectedIndex = tableList.getSelectedIndex();
         if (selectedIndex != -1) {
             String currentTableName = tableListModel.getElementAt(selectedIndex);
-            String newTableName = JOptionPane.showInputDialog(this, "Neuer Tabellenname:", currentTableName);
+            String newTableName = JOptionPane.showInputDialog(this, bundle.getString("new_table_name_prompt"), currentTableName);
             if (newTableName != null && !newTableName.isEmpty()) {
                 tableListModel.setElementAt(newTableName, selectedIndex);
                 // Update the table name in the UI if necessary
@@ -111,21 +156,21 @@ public class TablePanel extends JPanel {
                         Files.move(oldFile.toPath(), newFile.toPath());
                     } catch (IOException e) {
                         System.out.println(e.getMessage());
-                        JOptionPane.showMessageDialog(this, "Fehler beim Umbenennen der Datei!");
+                        JOptionPane.showMessageDialog(this, bundle.getString("file_rename_error"));
                     }
                 }
             }
         } else {
-            JOptionPane.showMessageDialog(this, "Bitte wählen Sie eine Tabelle aus, um den Namen zu ändern.", "Warnung", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, bundle.getString("select_table_to_rename"), bundle.getString("warning"), JOptionPane.WARNING_MESSAGE);
         }
     }
 
     private void addNewTable() {
         tableCount++;
-        String tableName = "Tabelle " + tableCount;
+        String tableName = bundle.getString("table") + " " + tableCount;
         tableListModel.addElement(tableName);
 
-        DefaultTableModel model = new DefaultTableModel(new Object[]{"Name", "Kalorien", "Anzahl", "Preis"}, 0) {
+        DefaultTableModel model = new DefaultTableModel(new Object[]{bundle.getString("name"), bundle.getString("calories"), bundle.getString("amount"), bundle.getString("price")}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return true; // All cells are editable
@@ -171,7 +216,7 @@ public class TablePanel extends JPanel {
                     if (file.isFile() && file.getName().endsWith(".xml")) {
                         String tableName = file.getName().replace(".xml", "");
                         try {
-                            DefaultTableModel model = new DefaultTableModel(new Object[]{"Name", "Kalorien", "Anzahl", "Preis"}, 0) {
+                            DefaultTableModel model = new DefaultTableModel(new Object[]{bundle.getString("name"), bundle.getString("calories"), bundle.getString("amount"), bundle.getString("price")}, 0) {
                                 @Override
                                 public boolean isCellEditable(int row, int column) {
                                     return true; // All cells are editable
@@ -199,7 +244,7 @@ public class TablePanel extends JPanel {
             DefaultTableModel model = (DefaultTableModel) table.getModel();
             model.addRow(new Object[]{"", "", "", ""}); // Add an empty row
         } else {
-            JOptionPane.showMessageDialog(this, "Bitte wählen Sie eine Tabelle aus, um eine Zeile hinzuzufügen.", "Warnung", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, bundle.getString("select_table_to_add_row"), bundle.getString("warning"), JOptionPane.WARNING_MESSAGE);
         }
     }
 
@@ -207,22 +252,18 @@ public class TablePanel extends JPanel {
         int selectedIndex = tableList.getSelectedIndex();
         if (selectedIndex != -1) {
             String tableName = tableListModel.getElementAt(selectedIndex);
-            // Remove the table from the list model
             tableListModel.remove(selectedIndex);
-            // Remove the table detail from the panel
             tableDetailPanel.remove(selectedIndex);
-            // Delete the corresponding XML file
             File file = new File(DIRECTORY_PATH + tableName + ".xml");
             if (file.exists() && file.isFile()) {
                 if (!file.delete()) {
-                    JOptionPane.showMessageDialog(this, "Fehler beim Löschen der Datei!", "Fehler", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, bundle.getString("file_delete_error"), bundle.getString("warning"), JOptionPane.WARNING_MESSAGE);
                 }
             }
-            // Refresh the UI
             tableDetailPanel.revalidate();
             tableDetailPanel.repaint();
         } else {
-            JOptionPane.showMessageDialog(this, "Bitte wählen Sie eine Tabelle aus, um sie zu löschen.", "Warnung", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, bundle.getString("select_table_to_delete"), bundle.getString("warning"), JOptionPane.WARNING_MESSAGE);
         }
     }
 }
