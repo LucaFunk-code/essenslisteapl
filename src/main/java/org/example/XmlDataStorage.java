@@ -48,7 +48,7 @@ public class XmlDataStorage implements DataStorage {
             data = mapper.readValue(xmlString, new TypeReference<>() {
             });
 
-            // Überprüfen, ob die Anzahl der Daten korrekt ist (muss durch 4 teilbar sein)
+            // Überprüfen, ob die Anzahl der Daten korrekt ist (muss durch 5 teilbar sein)
             if (data.size() % 5 == 0) {
                 int numRows = data.size() / 5; // Berechne die Anzahl der Zeilen basierend auf der Anzahl der Elemente und der Anzahl der Spalten (hier 4)
                 for (int i = 0; i < numRows; i++) {

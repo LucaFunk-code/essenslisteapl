@@ -12,8 +12,10 @@ import java.util.Collections;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import static org.example.Options.DIRECTORY_PATH;
+
 public class TablePanel extends JPanel {
-    private static final String DIRECTORY_PATH = "src/main/resources/data/";
+
     private final DefaultListModel<String> tableListModel;
     private final JList<String> tableList;
     private final JPanel tableDetailPanel;
@@ -97,7 +99,6 @@ public class TablePanel extends JPanel {
         sortButton.setText(bundle.getString("sort_table"));
         deleteButton.setText(bundle.getString("delete_table"));
         saveButton.setText(bundle.getString("save_tables"));
-
     }
 
     private void changeLanguage() {
@@ -110,9 +111,7 @@ public class TablePanel extends JPanel {
 
         } else if (choice == 1) {
             bundle = ResourceBundle.getBundle("messages", new Locale("de"));
-
         }
-
         updateButtonLabels();
     }
 
@@ -179,7 +178,6 @@ public class TablePanel extends JPanel {
             public boolean isCellEditable(int row, int column) {
                 return true; // All cells are editable
             }
-
             @Override
             public Class<?> getColumnClass(int columnIndex) {
                 // Specify the data type for each column
@@ -193,14 +191,11 @@ public class TablePanel extends JPanel {
                 }
             }
         };
-
-        // Add an empty row with initial values
         model.addRow(new Object[]{"", 0, 0, 0.0, ""});
-
         JTable table = new JTable(model);
-
+        String[] tags = {bundle.getString("tag_vegetable"), bundle.getString("tag_fruit"), bundle.getString("tag_meat")};
         // Add JComboBox as editor for tags column
-        JComboBox<String> tagsComboBox = new JComboBox<>(new String[]{"Vegetable", "Fruit"}); // Predefined tags
+        JComboBox<String> tagsComboBox = new JComboBox<>(tags); // Predefined tags
         TableColumn tagsColumn = table.getColumnModel().getColumn(4); // Assuming the tags column is the 5th column
         tagsColumn.setCellEditor(new DefaultCellEditor(tagsComboBox));
 
@@ -221,7 +216,7 @@ public class TablePanel extends JPanel {
         }
     }
 
-    private void saveAllTables() {
+    public void saveAllTables() {
         int tableCount = tableListModel.getSize();
         int componentCount = tableDetailPanel.getComponentCount();
 
@@ -229,7 +224,6 @@ public class TablePanel extends JPanel {
             System.err.println("Mismatch in table count and component count. Unable to save tables.");
             return;
         }
-
         for (int i = 0; i < tableCount; i++) {
             String tableName = tableListModel.getElementAt(i);
             JScrollPane scrollPane = (JScrollPane) tableDetailPanel.getComponent(i);
@@ -270,6 +264,28 @@ public class TablePanel extends JPanel {
                 }
             }
         }
+        TablePanel tablePanelInstance = new TablePanel();
+        String tablePanelData = tablePanelInstance.toString();
+        System.out.println(tablePanelData);
+    }
+
+    @Override
+    public String toString() {
+        return "TablePanel{" +
+                "tableListModel=" + tableListModel +
+                ", tableList=" + tableList +
+                ", tableDetailPanel=" + tableDetailPanel +
+                ", tableCount=" + tableCount +
+                ", dataStorage=" + dataStorage +
+                ", bundle=" + bundle +
+                ", addButton=" + addButton +
+                ", addRowButton=" + addRowButton +
+                ", renameButton=" + renameButton +
+                ", sortButton=" + sortButton +
+                ", deleteButton=" + deleteButton +
+                ", saveButton=" + saveButton +
+                ", languageButton=" + languageButton +
+                '}';
     }
 
     private void addNewRowToSelectedTable() {
@@ -280,7 +296,7 @@ public class TablePanel extends JPanel {
             DefaultTableModel model = (DefaultTableModel) table.getModel();
 
             // Create a JComboBox as editor for tags column
-            String[] tags = {"Vegetable", "Fruit"};
+            String[] tags = {bundle.getString("tag_vegetable"), bundle.getString("tag_fruit"), bundle.getString("tag_meat")};
             JComboBox<String> tagsComboBox = new JComboBox<>(tags);
             TableColumn tagsColumn = table.getColumnModel().getColumn(4); // Assuming the tags column is the 5th column
             tagsColumn.setCellEditor(new DefaultCellEditor(tagsComboBox));
@@ -320,4 +336,5 @@ public class TablePanel extends JPanel {
             JOptionPane.showMessageDialog(this, bundle.getString("select_table_to_delete"), bundle.getString("warning"), JOptionPane.WARNING_MESSAGE);
         }
     }
+
 }
