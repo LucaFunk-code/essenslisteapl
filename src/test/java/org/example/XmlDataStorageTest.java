@@ -21,16 +21,16 @@ public class XmlDataStorageTest {
 
     @Test
     public void testSave() throws IOException {
-        DefaultTableModel model = new DefaultTableModel(new Object[]{"Name", "Age"}, 0);
-        model.addRow(new Object[]{"Alice", 30});
-        model.addRow(new Object[]{"Bob", 25});
+        DefaultTableModel model = new DefaultTableModel( new Object[]{"Name", "Age"}, 0 );
+        model.addRow( new Object[]{"Alice", 30} );
+        model.addRow( new Object[]{"Bob", 25} );
 
         String tableName = "testTable";
-        xmlDataStorage.save(model, tableName);
+        xmlDataStorage.save( model, tableName );
 
         // Verify that the file was created
-        File file = new File(TEST_DIRECTORY_PATH + tableName + ".xml");
-        assertTrue(file.exists());
+        File file = new File( TEST_DIRECTORY_PATH + tableName + ".xml" );
+        assertTrue( file.exists() );
 
         // Clean up
         file.delete();
@@ -43,21 +43,28 @@ public class XmlDataStorageTest {
 
         // Create a sample XML file
         String tableName = "testTable";
-        File file = new File(TEST_DIRECTORY_PATH + tableName + ".xml");
+        File file = new File( TEST_DIRECTORY_PATH + tableName + ".xml" );
         file.createNewFile();
-        String xmlContent = "<Vector><item>Alice</item><item>30</item></Vector><Vector><item>Bob</item><item>25</item></Vector>";
-        Files.write(file.toPath(), xmlContent.getBytes());
+        String xmlContent = "<Vector><item>Alice</item><item>30</item><item>female</item><item>165</item><item>60</item></Vector><Vector><item>Bob</item><item>25</item><item>male</item><item>180</item><item>75</item></Vector>";
+        Files.write( file.toPath(), xmlContent.getBytes() );
 
         // Load the data
         DefaultTableModel model = new DefaultTableModel();
-        xmlDataStorage.load(model, tableName);
+        xmlDataStorage.load( model, tableName );
 
         // Verify that the data was loaded correctly
-        assertEquals(2, model.getRowCount());
-        assertEquals("Alice", model.getValueAt(0, 0));
-        assertEquals("30", model.getValueAt(0, 1));
-        assertEquals("Bob", model.getValueAt(1, 0));
-        assertEquals("25", model.getValueAt(1, 1));
+        assertEquals( 2, model.getRowCount() );
+        assertEquals( "Alice", model.getValueAt( 0, 0 ) );
+        assertEquals( "30", model.getValueAt( 0, 1 ) );
+        assertEquals( "female", model.getValueAt( 0, 2 ) );
+        assertEquals( "165", model.getValueAt( 0, 3 ) );
+        assertEquals( "60", model.getValueAt( 0, 4 ) );
+
+        assertEquals( "Bob", model.getValueAt( 1, 0 ) );
+        assertEquals( "25", model.getValueAt( 1, 1 ) );
+        assertEquals( "male", model.getValueAt( 1, 2 ) );
+        assertEquals( "180", model.getValueAt( 1, 3 ) );
+        assertEquals( "75", model.getValueAt( 1, 4 ) );
 
         // Clean up
         file.delete();

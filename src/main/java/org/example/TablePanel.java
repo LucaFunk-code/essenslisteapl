@@ -1,5 +1,5 @@
 package org.example;
-
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
@@ -13,6 +13,8 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 import static org.example.Options.DIRECTORY_PATH;
+
+
 
 public class TablePanel extends JPanel {
 
@@ -36,6 +38,22 @@ public class TablePanel extends JPanel {
         this.dataStorage = new XmlDataStorage();
         this.bundle = ResourceBundle.getBundle("messages", Locale.getDefault());
 
+       class CustomCellRenderer extends DefaultListCellRenderer {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                Component component = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+
+                // Hier passen Sie die Darstellung der Zelle an, basierend auf dem Wert und anderen Eigenschaften
+                if (index == 0) { // Wenn es sich um die fünfte Spalte handelt (null-basiert)
+                    component.setBackground(Color.YELLOW); // Setzen Sie die Hintergrundfarbe auf Hellgrün
+                }
+
+                return component;
+            }
+        }
+
+
+
         setLayout(new BorderLayout());
         // List Panel
         tableListModel = new DefaultListModel<>();
@@ -46,6 +64,8 @@ public class TablePanel extends JPanel {
         listScrollPane.setPreferredSize(new Dimension(200, 0));
         add(listScrollPane, BorderLayout.WEST);
 
+        CustomCellRenderer customCellRenderer = new CustomCellRenderer();
+        tableList.setCellRenderer(customCellRenderer);
         // Detail Panel
         tableDetailPanel = new JPanel(new CardLayout());
         add(tableDetailPanel, BorderLayout.CENTER);
@@ -89,8 +109,11 @@ public class TablePanel extends JPanel {
         languageButton.addActionListener(_ -> changeLanguage());
         bottomButtonPanel.add(languageButton);
 
+
+
         updateButtonLabels();
     }
+
 
     private void updateButtonLabels() {
         addButton.setText(bundle.getString("add_table"));
