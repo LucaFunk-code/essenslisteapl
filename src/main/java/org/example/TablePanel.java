@@ -34,6 +34,7 @@ public class TablePanel extends JPanel {
     private JButton saveButton;
     private JButton languageButton;
 
+
     public TablePanel() {
         this.dataStorage = new XmlDataStorage();
         this.bundle = ResourceBundle.getBundle("messages", Locale.getDefault());
