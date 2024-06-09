@@ -1,11 +1,13 @@
 package org.example;
 
-import javax.swing.*;
 
+/**
+ * Starts the application
+ */
 public class Main {
     public static void main(String[] args) {
-       new ApplicationFrame("Essensliste");
+        new ApplicationFrame( "Essensliste" );
 
-//test2
+
     }
 }

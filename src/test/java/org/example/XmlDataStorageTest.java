@@ -9,6 +9,9 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Methods for saving and loading table data test
+ */
 class XmlDataStorageTest {
     private static final String TABLE_NAME = "TestTable";
     private File file;
