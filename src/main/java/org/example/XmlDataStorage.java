@@ -8,7 +8,7 @@ import java.io.*;
 import java.util.*;
 
 public class XmlDataStorage implements DataStorage {
-    private static final String DIRECTORY_PATH = "src/main/resources/data/";
+    public static final String DIRECTORY_PATH = "src/main/resources/data/";
 
     @Override
     public void save(DefaultTableModel model, String tableName) throws IOException {
